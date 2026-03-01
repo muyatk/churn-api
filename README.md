@@ -1,32 +1,40 @@
-# Telco Customer Churn Prediction API
+# 🧠 Telco Customer Churn Prediction API
 
 This project trains a Machine Learning model to predict customer churn  
-and exposes it through a REST API using FastAPI.
+and exposes it through a REST API using **FastAPI**.
 
-The purpose of this implementation is to demonstrate practical ML engineering skills, including:
+The goal of this implementation is to demonstrate practical ML engineering skills, including:
 
 - Data preprocessing
 - Pipeline construction
 - Model training & evaluation
 - Model serialization
-- REST API deployment
+- REST API development
+- Basic testing
 
 ---
 
 ## 📁 Project Structure
 
 ```
-.
+churn-api/
+│
+├── app.py
+├── train.py
+├── requirements.txt
+├── README.md
 ├── dataset/
 │   └── WA_Fn-UseC_-Telco-Customer-Churn.csv
-├── train.py
-├── app.py
-├── requirements.txt
-└── README.md
+├── serving_model.pkl
+└── tests/
+    └── test_api.py
 ```
 
-- **train.py** → Data cleaning, model training, evaluation, and model serialization  
+### File Overview
+
+- **train.py** → Data cleaning, preprocessing, model training, evaluation, and serialization  
 - **app.py** → FastAPI application serving the trained model  
+- **tests/test_api.py** → Basic API tests using pytest  
 - **serving_model.pkl** → Serialized trained pipeline (generated after training)
 
 ---
@@ -69,19 +77,58 @@ This will:
 uvicorn app:app --reload
 ```
 
-Open in your browser:
+Open the interactive documentation:
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
-Use the interactive Swagger UI to test the `/predict` endpoint.
+You can test the `/predict` endpoint directly from Swagger UI.
+
+---
+
+## 📬 Example Request (cURL)
+
+```bash
+curl -X POST "http://127.0.0.1:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d '{
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "Yes",
+        "Dependents": "No",
+        "tenure": 12,
+        "PhoneService": "Yes",
+        "MultipleLines": "No",
+        "InternetService": "DSL",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": 45.3,
+        "TotalCharges": 540.0
+     }'
+```
+
+Example response:
+
+```json
+{
+  "prediction": "No",
+  "churn_probability": 0.16
+}
+```
 
 ---
 
 ## 🩺 Health Check
 
-To verify the API is running:
+Verify the API is running:
 
 ```
 http://127.0.0.1:8000/health
@@ -97,6 +144,22 @@ Expected response:
 
 ---
 
+## 🧪 Run Tests
+
+Basic API tests are implemented using `pytest`.
+
+```bash
+pytest
+```
+
+Tests validate:
+
+- API startup
+- `/health` endpoint
+- `/predict` endpoint response structure
+
+---
+
 ## 📊 Model Details
 
 - **Algorithm:** Random Forest Classifier  
@@ -105,21 +168,43 @@ Expected response:
   - Numerical features passed through unchanged
 - **Train/Test Split:** 80/20 (stratified)
 - **Evaluation Metric:** F1 Score  
+- **Model Serving:** Full sklearn pipeline serialized via `joblib`
 
 ---
 
-## 🔮 Possible Production Improvements
+## 🔐 Input Validation
 
-If deployed in production, potential improvements include:
+The API uses Pydantic models to:
 
-- Model versioning
+- Enforce required fields
+- Validate numeric ranges (e.g., non-negative tenure and charges)
+- Ensure proper request structure
+
+Invalid inputs return automatic HTTP 422 responses.
+
+---
+
+## 🔮 Potential Production Improvements
+
+If extended for production use, the following improvements could be considered:
+
+- Model versioning and experiment tracking
 - Automated hyperparameter tuning
-- Logging & monitoring
+- Structured logging and monitoring
 - Docker containerization
 - CI/CD integration
+- Input schema versioning
+- Performance benchmarking
 
 ---
 
 ## ✅ Summary
 
-This implementation focuses on clarity, reproducibility, and clean engineering practices.
+This implementation focuses on:
+
+- Clarity  
+- Reproducibility  
+- Clean engineering practices  
+- Practical ML system design  
+
+It demonstrates an end-to-end workflow from data processing to deployment-ready API.

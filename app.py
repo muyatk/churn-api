@@ -1,7 +1,7 @@
 # app.py
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
 
@@ -15,10 +15,10 @@ model = joblib.load("serving_model.pkl")
 # Define input schema
 class CustomerInput(BaseModel):
     gender: str
-    SeniorCitizen: int
+    SeniorCitizen: int = Field(..., ge=0, le=1)
     Partner: str
     Dependents: str
-    tenure: int
+    tenure: int = Field(..., ge=0)
     PhoneService: str
     MultipleLines: str
     InternetService: str
@@ -31,12 +31,12 @@ class CustomerInput(BaseModel):
     Contract: str
     PaperlessBilling: str
     PaymentMethod: str
-    MonthlyCharges: float
-    TotalCharges: float
+    MonthlyCharges: float = Field(..., ge=0)
+    TotalCharges: float = Field(..., ge=0)
 
 @app.post("/predict")
 def predict(data: CustomerInput):
-    input_df = pd.DataFrame([data.dict()])
+    input_df = pd.DataFrame([data.model_dump()])
 
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0][1]
